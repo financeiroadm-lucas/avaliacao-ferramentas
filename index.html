@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Avaliação de ferramentas — FM Moto Parts</title>
+<style>
+  :root{--ink:#141414;--black:#0b0b0b;--muted:#6c6b66;--line:#dcdad3;--bg:#ece9e2;--red:#E30613;--red-dark:#b30410;--yellow:#FFD200;--field:#faf9f6;--ok:#0f7a3d;--warn:#8a5a00}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:16px;line-height:1.45}
+  .stripe{height:6px;display:flex}.stripe i{flex:1}.stripe .r{background:var(--red)}.stripe .y{background:var(--yellow)}
+  header{background:var(--black);color:#fff;padding:16px 18px}
+  header b{display:block;font-size:17px;letter-spacing:.2px}
+  header span{font-size:13px;color:#cfcdc6}
+  main{max-width:720px;margin:0 auto;padding:18px 14px 90px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(11,11,11,.08)}
+  h1{font-size:19px;margin:0 0 6px}
+  p{margin:0 0 10px}
+  .muted{color:var(--muted);font-size:14px}
+  label{display:block;font-weight:600;margin:0 0 6px}
+  input[type=password],input[type=text],textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--field);font:inherit;color:var(--ink)}
+  textarea{resize:vertical;min-height:70px}
+  input:focus,textarea:focus{outline:2px solid var(--yellow);border-color:var(--black)}
+  button{font:inherit;cursor:pointer}
+  .btn{background:var(--red);color:#fff;border:0;border-radius:8px;padding:13px 18px;font-weight:700;width:100%}
+  .btn:hover{background:var(--red-dark)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .msg{padding:12px 14px;border-radius:8px;margin-top:12px;font-size:15px}
+  .msg.err{background:#fdecee;border:1px solid #f3b6bb;color:#8a0c16}
+  .msg.warn{background:#fff6dc;border:1px solid #f0d77a;color:var(--warn)}
+  .msg.ok{background:#e8f6ee;border:1px solid #a9dcbf;color:var(--ok)}
+  .info{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px}
+  .info dt{color:var(--muted)} .info dd{margin:0;font-weight:600}
+  .item{border-top:1px solid var(--line);padding:12px 0}
+  .item:first-of-type{border-top:0}
+  .item .nome{font-weight:600;margin-bottom:8px}
+  .item .nome small{color:var(--muted);font-weight:400;margin-right:6px}
+  .est{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .est button{padding:12px 6px;border:2px solid var(--line);border-radius:8px;background:#fff;font-weight:700;color:var(--ink)}
+  .est button[aria-pressed=true][data-v=Bom]{background:var(--ok);border-color:var(--ok);color:#fff}
+  .est button[aria-pressed=true][data-v=Regular]{background:var(--yellow);border-color:#c9a400;color:var(--black)}
+  .est button[aria-pressed=true][data-v=Ruim]{background:var(--red);border-color:var(--red);color:#fff}
+  .item.falta{background:#fff6f6;margin:0 -10px;padding:12px 10px;border-radius:8px}
+  .item input.obs{margin-top:8px}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px;box-shadow:0 -4px 16px rgba(11,11,11,.1)}
+  .bar div{max-width:720px;margin:0 auto;display:flex;gap:12px;align-items:center}
+  .bar .prog{font-size:14px;color:var(--muted);white-space:nowrap}
+  .bar .btn{width:auto;flex:1}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="stripe"><i class="r"></i><i class="y"></i><i class="r"></i><i class="y"></i><i class="r"></i><i class="y"></i><i class="r"></i><i class="y"></i></div>
+<header><b>FM Moto Parts</b><span>Avaliação do estado das ferramentas</span></header>
+
+<main>
+  <!-- 1. Senha -->
+  <section id="telaSenha" class="card">
+    <h1>Acesso dos gerentes</h1>
+    <p class="muted">Esta avaliação é de uso exclusivo da gerência. Digite a senha para continuar.</p>
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" autocomplete="off" autocapitalize="off">
+    <div style="height:12px"></div>
+    <button id="btnEntrar" class="btn">Entrar</button>
+    <div id="msgSenha"></div>
+  </section>
+
+  <!-- 2. Formulário -->
+  <section id="telaForm" class="hidden">
+    <div class="card">
+      <h1>Avaliação das ferramentas</h1>
+      <dl class="info">
+        <dt>Mecânico</dt><dd id="iMec"></dd>
+        <dt>Filial</dt><dd id="iFil"></dd>
+        <dt>Entrega</dt><dd id="iEnt"></dd>
+        <dt>Prazo</dt><dd id="iPrazo"></dd>
+      </dl>
+    </div>
+    <div class="card">
+      <label for="avaliador">Seu nome (gerente que está avaliando)</label>
+      <input id="avaliador" type="text" maxlength="100" autocomplete="name">
+    </div>
+    <div class="card">
+      <p class="muted">Marque o estado de cada ferramenta: <b>Bom</b>, <b>Regular</b> ou <b>Ruim</b>. Ao marcar Regular ou Ruim, você pode escrever uma observação (opcional).</p>
+      <div id="lista"></div>
+    </div>
+    <div class="card">
+      <label for="obsGeral">Observação geral (opcional)</label>
+      <textarea id="obsGeral" maxlength="1000"></textarea>
+      <div id="msgForm"></div>
+    </div>
+  </section>
+
+  <!-- 3. Mensagem final / bloqueios -->
+  <section id="telaFim" class="card hidden"><h1 id="fimTitulo"></h1><p id="fimTexto"></p></section>
+</main>
+
+<div id="barra" class="bar hidden"><div><span class="prog" id="prog"></span><button id="btnEnviar" class="btn">Enviar avaliação</button></div></div>
+
+<script>
+/* ====== CONFIGURAÇÃO ====== */
+const API_URL   = 'https://script.google.com/macros/s/AKfycbyX0WcjSJp0HS515Vo35_jLxLuaD0WQ19wEkQm8_WYh7TnbCKa3hW_J-pf4pa1y8hWa/exec';
+const ABRE_APOS = 7;   // a avaliação abre N dias depois da entrega
+const DURA_DIAS = 3;   // e fica aberta por N dias (inclusive o primeiro). AJUSTAR se o prazo for outro.
+/* ========================== */
+
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+const termo = { id:q.get('t')||'', mec:q.get('m')||'', fil:q.get('f')||'', ent:q.get('e')||'', kit:q.get('k')||'' };
+let senhaOk = '', itens = [];
+
+function mostrar(tela){ ['telaSenha','telaForm','telaFim'].forEach(t=>$(t).classList.toggle('hidden',t!==tela)); }
+function fim(titulo,texto){ $('telaSenha').classList.add('hidden'); $('telaForm').classList.add('hidden'); $('barra').classList.add('hidden'); $('fimTitulo').textContent=titulo; $('fimTexto').textContent=texto; $('telaFim').classList.remove('hidden'); window.scrollTo(0,0); }
+function msg(el,tipo,texto){ el.innerHTML=''; if(!texto) return; const d=document.createElement('div'); d.className='msg '+tipo; d.textContent=texto; el.appendChild(d); }
+
+/* ---- datas (sem fuso: tudo em AAAA-MM-DD) ---- */
+const hoje = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const somaDias = (iso,n) => { const [y,m,d]=iso.split('-').map(Number); const t=new Date(Date.UTC(y,m-1,d+n)); return t.toISOString().slice(0,10); };
+const fmt = iso => iso.split('-').reverse().join('/');
+const dataValida = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
+
+/* ---- ferramentas: "Chave L:8-19, 22|Alicate:|Chave estrela:Pequena, Grande" ---- */
+function parseOpcoes(txt){
+  const out=[];
+  String(txt||'').split(/[,;]+/).map(s=>s.trim()).filter(Boolean).forEach(tok=>{
+    const m=tok.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    if(m){ let a=+m[1], b=+m[2]; if(a>b){const t=a;a=b;b=t;} for(let i=a;i<=b&&i<a+80;i++) out.push(String(i)); }
+    else out.push(tok);
+  });
+  return out.filter((x,i)=>out.indexOf(x)===i);
+}
+function expandir(kit){
+  const out=[];
+  kit.split('|').map(s=>s.trim()).filter(Boolean).forEach(par=>{
+    const i=par.indexOf(':'); const nome=(i<0?par:par.slice(0,i)).trim(); const ops=i<0?[]:parseOpcoes(par.slice(i+1));
+    if(!nome) return;
+    if(ops.length) ops.forEach(o=>out.push(`${nome} ${o}`)); else out.push(nome);
+  });
+  return out;
+}
+
+/* ---- rede ---- */
+async function chamar(corpo){
+  const r = await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo)});
+  return r.json();
+}
+const ERROS = {
+  senha_invalida:'Senha incorreta.',
+  senha_nao_configurada:'O serviço ainda não está configurado. Avise o responsável.',
+  ja_respondido:'Este termo já foi avaliado.',
+  avaliador_obrigatorio:'Informe o seu nome.',
+  estado_invalido:'Há uma ferramenta com estado inválido. Recarregue a página e tente de novo.',
+  observacao_longa:'Alguma observação ficou grande demais. Resuma e tente de novo.',
+};
+const erroTexto = e => ERROS[e] || ('Não foi possível concluir (' + e + ').');
+
+/* ---- início ---- */
+function linkInvalido(){
+  return !termo.id || !termo.mec || !termo.fil || !dataValida(termo.ent) || !expandir(termo.kit).length;
+}
+if(linkInvalido()){
+  fim('Link inválido','Este endereço está incompleto. Leia novamente o QR code impresso no termo de responsabilidade.');
+}
+
+$('btnEntrar').onclick = async () => {
+  const s = $('senha').value;
+  if(!s){ msg($('msgSenha'),'err','Digite a senha.'); return; }
+  $('btnEntrar').disabled = true; msg($('msgSenha'),'warn','Conferindo…');
+  try{
+    const r = await chamar({acao:'verificar', senha:s, termoId:termo.id});
+    if(!r.ok){ msg($('msgSenha'),'err',erroTexto(r.erro)); return; }
+    senhaOk = s;
+    if(r.jaRespondido){ fim('Termo já avaliado','Este termo já recebeu uma avaliação. Não é possível enviar outra.'); return; }
+    const abre = somaDias(termo.ent, ABRE_APOS), fecha = somaDias(abre, DURA_DIAS-1), h = hoje();
+    if(h < abre){ fim('Avaliação ainda não liberada',`A avaliação deste termo abre em ${fmt(abre)}.`); return; }
+    if(h > fecha){ fim('Prazo encerrado',`O prazo para avaliar este termo terminou em ${fmt(fecha)}. Procure o responsável pelo controle das ferramentas.`); return; }
+    montar(abre,fecha);
+  }catch(e){
+    msg($('msgSenha'),'err','Sem conexão com o serviço. Verifique a internet e tente de novo.');
+  }finally{ $('btnEntrar').disabled = false; }
+};
+$('senha').addEventListener('keydown',e=>{ if(e.key==='Enter') $('btnEntrar').click(); });
+
+function montar(abre,fecha){
+  $('iMec').textContent=termo.mec; $('iFil').textContent=termo.fil; $('iEnt').textContent=fmt(termo.ent);
+  $('iPrazo').textContent=`${fmt(abre)} a ${fmt(fecha)}`;
+  itens = expandir(termo.kit).map(nome=>({nome,estado:'',obs:''}));
+  const box=$('lista'); box.innerHTML='';
+  itens.forEach((it,i)=>{
+    const d=document.createElement('div'); d.className='item'; d.id='it'+i;
+    const n=document.createElement('div'); n.className='nome';
+    const sm=document.createElement('small'); sm.textContent=String(i+1).padStart(2,'0'); n.append(sm,document.createTextNode(it.nome));
+    const g=document.createElement('div'); g.className='est';
+    ['Bom','Regular','Ruim'].forEach(v=>{
+      const b=document.createElement('button'); b.type='button'; b.dataset.v=v; b.textContent=v; b.setAttribute('aria-pressed','false');
+      b.onclick=()=>{ it.estado=v; g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); o.classList.toggle('hidden',v==='Bom'); if(v==='Bom'){o.value='';it.obs='';} d.classList.remove('falta'); atualizar(); };
+      g.appendChild(b);
+    });
+    const o=document.createElement('input'); o.type='text'; o.className='obs hidden'; o.maxLength=300; o.placeholder='Observação (opcional)'; o.oninput=()=>{it.obs=o.value;};
+    d.append(n,g,o); box.appendChild(d);
+  });
+  mostrar('telaForm'); $('barra').classList.remove('hidden'); atualizar(); window.scrollTo(0,0);
+}
+function atualizar(){ const n=itens.filter(i=>i.estado).length; if(n===itens.length && $('msgForm').textContent.startsWith('Falta')) $('msgForm').innerHTML=''; $('prog').textContent=`${n} de ${itens.length}`; }
+
+$('btnEnviar').onclick = async () => {
+  const av=$('avaliador').value.trim();
+  const faltam=itens.map((it,i)=>it.estado?-1:i).filter(i=>i>=0);
+  itens.forEach((it,i)=>$('it'+i).classList.toggle('falta',!it.estado));
+  if(av.length<2){ msg($('msgForm'),'err','Informe o seu nome no início do formulário.'); $('avaliador').focus(); return; }
+  if(faltam.length){ msg($('msgForm'),'err',`Falta marcar ${faltam.length} ${faltam.length===1?'ferramenta':'ferramentas'} (destacadas em vermelho).`); $('it'+faltam[0]).scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  if(!confirm('Enviar a avaliação? Depois do envio não será possível alterar.')) return;
+  $('btnEnviar').disabled=true; msg($('msgForm'),'warn','Enviando…');
+  try{
+    const r=await chamar({senha:senhaOk, termoId:termo.id, mecanico:termo.mec, filial:termo.fil, avaliador:av,
+      itens:itens.map(i=>({nome:i.nome,estado:i.estado,obs:i.obs})), obsGeral:$('obsGeral').value.trim()});
+    if(r.ok) fim('Avaliação enviada','Obrigado. As respostas foram registradas. Você já pode fechar esta página.');
+    else if(r.erro==='ja_respondido') fim('Termo já avaliado','Este termo já recebeu uma avaliação.');
+    else msg($('msgForm'),'err',erroTexto(r.erro));
+  }catch(e){
+    msg($('msgForm'),'err','Sem conexão. Suas marcações continuam na tela; verifique a internet e toque em Enviar de novo.');
+  }finally{ $('btnEnviar').disabled=false; }
+};
+</script>
+</body>
+</html>
