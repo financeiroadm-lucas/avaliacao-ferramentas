@@ -102,13 +102,16 @@
 <script>
 /* ====== CONFIGURAÇÃO ====== */
 const API_URL   = 'https://script.google.com/macros/s/AKfycbyX0WcjSJp0HS515Vo35_jLxLuaD0WQ19wEkQm8_WYh7TnbCKa3hW_J-pf4pa1y8hWa/exec';
-const ABRE_APOS = 7;   // a avaliação abre N dias depois da entrega
-const DURA_DIAS = 3;   // e fica aberta por N dias (inclusive o primeiro). AJUSTAR se o prazo for outro.
+const ABRE_PADRAO = 7;  // usados só se o link não trouxer os prazos (a = abre N dias após a entrega; x = data limite AAAA-MM-DD)
+const LIMITE_PADRAO = 10; // dias após a entrega, se o link não trouxer a data limite
 /* ========================== */
 
 const $ = id => document.getElementById(id);
 const q = new URLSearchParams(location.search);
 const termo = { id:q.get('t')||'', mec:q.get('m')||'', fil:q.get('f')||'', ent:q.get('e')||'', kit:q.get('k')||'' };
+const numQ=(k,min,max,pad)=>{ const v=parseInt(q.get(k)); return isNaN(v)||v<min||v>max?pad:v; };
+const ABRE_APOS = numQ('a',0,60,ABRE_PADRAO);
+const LIMITE_ISO = /^\d{4}-\d{2}-\d{2}$/.test(q.get('x')||'') ? q.get('x') : '';
 let senhaOk = '', itens = [];
 
 function mostrar(tela){ ['telaSenha','telaForm','telaFim'].forEach(t=>$(t).classList.toggle('hidden',t!==tela)); }
@@ -121,7 +124,7 @@ const somaDias = (iso,n) => { const [y,m,d]=iso.split('-').map(Number); const t=
 const fmt = iso => iso.split('-').reverse().join('/');
 const dataValida = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 
-/* ---- ferramentas: "Chave L:8-19, 22|Alicate:|Chave estrela:Pequena, Grande" ---- */
+/* ---- ferramentas: "Chave L:8-19,22~Alicate~Chave estrela:Pequena,Grande" ---- */
 function parseOpcoes(txt){
   const out=[];
   String(txt||'').split(/[,;]+/).map(s=>s.trim()).filter(Boolean).forEach(tok=>{
@@ -133,7 +136,7 @@ function parseOpcoes(txt){
 }
 function expandir(kit){
   const out=[];
-  kit.split('|').map(s=>s.trim()).filter(Boolean).forEach(par=>{
+  kit.split('~').map(s=>s.trim()).filter(Boolean).forEach(par=>{
     const i=par.indexOf(':'); const nome=(i<0?par:par.slice(0,i)).trim(); const ops=i<0?[]:parseOpcoes(par.slice(i+1));
     if(!nome) return;
     if(ops.length) ops.forEach(o=>out.push(`${nome} ${o}`)); else out.push(nome);
@@ -173,7 +176,7 @@ $('btnEntrar').onclick = async () => {
     if(!r.ok){ msg($('msgSenha'),'err',erroTexto(r.erro)); return; }
     senhaOk = s;
     if(r.jaRespondido){ fim('Termo já avaliado','Este termo já recebeu uma avaliação. Não é possível enviar outra.'); return; }
-    const abre = somaDias(termo.ent, ABRE_APOS), fecha = somaDias(abre, DURA_DIAS-1), h = hoje();
+    const abre = somaDias(termo.ent, ABRE_APOS), fecha = LIMITE_ISO || somaDias(termo.ent, LIMITE_PADRAO), h = hoje();
     if(h < abre){ fim('Avaliação ainda não liberada',`A avaliação deste termo abre em ${fmt(abre)}.`); return; }
     if(h > fecha){ fim('Prazo encerrado',`O prazo para avaliar este termo terminou em ${fmt(fecha)}. Procure o responsável pelo controle das ferramentas.`); return; }
     montar(abre,fecha);
